@@ -1,0 +1,5 @@
+threat-model/report.json
+threat-model/report.md
+threat-model/summary.md
+__pycache__/
+*.pyc

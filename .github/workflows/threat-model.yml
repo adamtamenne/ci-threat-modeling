@@ -1,0 +1,44 @@
+name: STRIDE Threat Model
+
+on:
+  pull_request:
+    paths:
+      - 'threat-model/**'
+      - '.github/workflows/threat-model.yml'
+
+jobs:
+  threat-model:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pytm
+        run: pip install pytm
+
+      - name: Generate threat report
+        run: |
+          cd threat-model
+          python webapp.py --json report.json
+          python generate_summary.py
+
+      - name: Post threat report as PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: threat-model
+          path: threat-model/summary.md
+
+      - name: Upload full report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stride-threat-report
+          path: threat-model/report.md
