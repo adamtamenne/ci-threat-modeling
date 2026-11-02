@@ -1,0 +1,38 @@
+name: Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Scan diff for security patterns
+        run: python scan_diff.py --base origin/${{ github.base_ref }} --summary-out summary.md --json-out findings.json
+
+      - name: Post findings as PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: security-review
+          path: summary.md
+
+      - name: Upload findings
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-findings
+          path: findings.json
