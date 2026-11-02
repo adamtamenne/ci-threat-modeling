@@ -121,3 +121,13 @@ external_to_app.data = [api_response]
 
 if __name__ == "__main__":
     tm.process()
+
+message_queue = Datastore("Message Queue (RabbitMQ)")
+message_queue.inBoundary = app_tier
+message_queue.isEncrypted = False
+message_queue.hasAccessControl = False
+
+app_to_queue = Dataflow(web_app, message_queue, "Publish Event")
+app_to_queue.protocol = "AMQP"
+app_to_queue.isEncrypted = False
+app_to_queue.data = [financial_data]
