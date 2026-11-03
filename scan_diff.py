@@ -172,6 +172,42 @@ PATTERNS = [
         remediation="Set XmlResolver = null in .NET. Disable DTD processing. Use defusedxml in Python.",
         cwe="CWE-611",
     ),
+        # Open Redirect
+    Pattern(
+        id="REDIR-01",
+        name="Open redirect with user-controlled URL",
+        description="User input is used in a redirect without validating that the destination is a trusted domain. Attacker crafts a link that redirects the victim to a phishing site.",
+        regex=r'''(redirect\s*\(\s*req\.|Redirect\s*\(\s*\w+|res\.redirect\s*\(\s*\w+|location\.href\s*=\s*\w+|window\.location\s*=\s*\w+|header\s*\(\s*['"]Location.*?\+)''',
+        languages=["cs", "js", "ts", "py", "go"],
+        stride=["Spoofing"],
+        severity="Medium",
+        remediation="Validate redirect URLs against an allowlist of trusted domains. Use relative paths instead of full URLs. Never pass user input directly to a redirect.",
+        cwe="CWE-601",
+    ),
+    # Insecure Randomness
+    Pattern(
+        id="RAND-01",
+        name="Insecure random number generation",
+        description="Using a non-cryptographic random source for security-sensitive values like tokens, session IDs, or secrets. Output is predictable and can be brute-forced.",
+        regex=r'''(Math\.random\s*\(|Random\s*\(\)|random\.random\s*\(|random\.randint\s*\(|rand\s*\(\)|mt_rand\s*\()''',
+        languages=["cs", "js", "ts", "py", "go", "java", "php"],
+        stride=["Spoofing", "Tampering"],
+        severity="Medium",
+        remediation="Use cryptographically secure alternatives: crypto.randomBytes() in Node, RandomNumberGenerator in .NET, secrets module in Python, crypto/rand in Go.",
+        cwe="CWE-330",
+    ),
+    # Logging Sensitive Data
+    Pattern(
+        id="LOG-01",
+        name="Sensitive data written to logs",
+        description="Passwords, tokens, API keys, or other secrets are logged to console or a log file. Logs are often stored in plaintext and accessible to operations staff or attackers who gain read access.",
+        regex=r'''(console\.log\s*\(.*?(password|token|secret|apikey|api_key|credential|ssn|credit)|logger?\.\w+\s*\(.*?(password|token|secret|apikey|api_key|credential)|print\s*\(.*?(password|token|secret|api_key|credential)|Log\.\w+\s*\(.*?(password|token|secret|apikey|credential))''',
+        languages=["cs", "js", "ts", "py", "go", "java"],
+        stride=["Information Disclosure"],
+        severity="High",
+        remediation="Never log sensitive values. Mask or redact credentials before logging. Use structured logging that excludes sensitive fields by policy.",
+        cwe="CWE-532",
+    ),
 ]
 
 # --- Diff parser ---
