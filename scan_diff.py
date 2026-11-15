@@ -18,6 +18,8 @@ import argparse
 import subprocess
 import sys
 from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from sarif_output import generate_sarif
 
 # --- Pattern definitions ---
 
@@ -341,6 +343,7 @@ def main():
     parser.add_argument("--file", help="Read diff from a patch file instead of git")
     parser.add_argument("--json-out", help="Write findings as JSON to this path")
     parser.add_argument("--summary-out", default="summary.md", help="Write markdown summary to this path")
+    parser.add_argument("--sarif-out", help="Write findings as SARIF 2.1.0 to this path")
     args = parser.parse_args()
 
     if args.file:
@@ -373,6 +376,10 @@ def main():
     if args.json_out:
         with open(args.json_out, "w") as f:
             f.write(generate_json(findings))
+
+    if args.sarif_out:
+        sarif = generate_sarif(findings)
+        Path(args.sarif_out).write_text(json.dumps(sarif, indent=2))
 
     print(f"{len(findings)} finding(s) in {len(hunks)} diff hunk(s)")
     sys.exit(0)
